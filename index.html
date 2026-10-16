@@ -7,14 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=Poiret+One&display=swap" rel="stylesheet">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f1e4d0">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Trame">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
 <style>
 :root{
   --bg:#f1d5c8;--panel:#f8e7de;--panel2:#f2d6c9;--ink:#2a3768;--mute:#7a6673;--line:#dcb1a1;
@@ -444,11 +436,47 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
   .lib{grid-column:2;grid-row:1}.stack{grid-column:2;grid-row:2}
   #library .fxbtn{width:72px}
 }
-#instOv{position:fixed;inset:0;z-index:80;display:grid;place-items:end center;background:rgba(10,10,30,.5);padding:16px calc(16px + env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px))}
-#instOv[hidden]{display:none}
-#instOv .box{width:100%;max-width:420px;background:var(--bg);color:var(--ink);border:1px solid var(--gold);border-radius:18px;padding:18px 18px 14px;box-shadow:0 14px 40px -12px rgba(0,0,0,.5)}
-#instOv h2{margin:0 0 8px}#instOv ol{margin:0 0 14px;padding-left:20px;line-height:1.6}
-#instOv button{width:100%}
+
+/* ===== Mobile v2 : image plus grande, panneaux repliables ===== */
+.mobtog{display:none}
+@media (max-width:1023px){
+  .bar{display:none}
+  .actions button{flex:none}
+  .mobtog{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:1;width:100%;text-align:left;padding:7px 12px;font-weight:600;font-size:14px}
+  .mobtog::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:-4px 4px 0 0;transition:transform .15s}
+  .mobtog[aria-expanded="false"]::after{transform:rotate(-45deg);margin:0 4px 0 0}
+  #stackTitle{display:none}
+  .stackhead .mobtog{width:auto}
+  .stage{height:auto!important}
+  main{grid-template-rows:minmax(0,1.7fr) minmax(0,1fr) minmax(0,1fr)}
+  body.lib-closed main{grid-template-rows:minmax(0,1.7fr) auto minmax(0,1fr)}
+  body.st-closed main{grid-template-rows:minmax(0,1.7fr) minmax(0,1fr) auto}
+  body.lib-closed.st-closed main{grid-template-rows:minmax(0,1fr) auto auto}
+  /* Panneau Effets : images en haut, puis onglets, recherche, préréglages */
+  .lib{display:flex;flex-direction:column}
+  .lib>*{flex:none}
+  #tabFx:not([hidden]){display:contents}
+  #togFx{order:0;margin-bottom:8px}
+  #library{order:1}
+  .lib .tabs{order:2;margin:4px 0 8px}
+  #search{order:3;margin-bottom:8px}
+  #tabStyle{order:7}
+  body.lib-closed .lib>*:not(#togFx){display:none!important}
+  body.lib-closed .lib{padding-bottom:8px;overflow:hidden}
+  body.lib-closed #togFx{margin-bottom:0}
+  body.st-closed .stack>*:not(.stackhead){display:none!important}
+  body.st-closed #btnClear{display:none}
+  body.st-closed .stackhead{margin-bottom:0;padding-bottom:0}
+}
+@media (min-width:700px) and (max-width:1023px) and (orientation:portrait){
+  body main,body.lib-closed main,body.st-closed main,body.lib-closed.st-closed main{grid-template-rows:minmax(0,1.3fr) minmax(0,1fr)}
+}
+@media (max-width:1023px) and (orientation:landscape) and (max-height:600px){
+  body main{grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+  body.lib-closed main{grid-template-rows:auto minmax(0,1fr)}
+  body.st-closed main{grid-template-rows:minmax(0,1fr) auto}
+  body.lib-closed.st-closed main{grid-template-rows:auto auto}
+}
 </style>
 </head>
 <body>
@@ -459,12 +487,13 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
     <button id="btnCompare" type="button" title="Maintenir pour voir l'original">Comparer</button>
     <button id="btnActual" type="button" aria-pressed="false">Taille réelle</button>
     <button id="btnExport" type="button" class="primary">Exporter en PNG</button>
-    <button id="btnSavePhoto" type="button" class="primary">Enregistrer dans Photos</button>
+    <button id="btnSavePhoto" type="button" class="primary">Enregistrer</button>
   </div>
 </header>
 
 <main>
   <aside class="lib pad" aria-label="Bibliothèque d'effets">
+    <button type="button" class="mobtog" id="togFx" aria-expanded="true">Effets</button>
     <div class="tabs"><button type="button" id="tFx" aria-pressed="true">Effets</button><button type="button" id="tSt" aria-pressed="false">Style commun</button></div>
     <div id="tabFx">
     <h2>Préréglages</h2>
@@ -497,7 +526,6 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
           <div class="row2">
             <button type="button" class="primary" id="btnPick">Choisir un fichier</button>
             <button type="button" id="btnSample">Essayer avec un exemple</button>
-            <button type="button" id="btnInstall" hidden>Installer l'application</button>
           </div>
         </div>
       </div>
@@ -519,7 +547,7 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
   </section>
 
   <aside class="stack pad" aria-label="Pile d'effets">
-    <div class="stackhead"><h2 id="stackTitle">Pile d'effets</h2><button type="button" id="btnClear" class="ib" style="padding:4px 8px;font-size:13px">Tout effacer</button></div>
+    <div class="stackhead"><button type="button" class="mobtog" id="togSt" aria-expanded="true">Réglages des effets</button><h2 id="stackTitle">Pile d'effets</h2><button type="button" id="btnClear" class="ib" style="padding:4px 8px;font-size:13px">Tout effacer</button></div>
     <div class="stackbar">
       <button type="button" id="btnUndo" class="ib" disabled title="Annule la dernière action (Ctrl+Z)">Rétablir</button>
       <button type="button" id="btnSaveList" class="ib" title="Enregistrer la pile actuelle sous un nom">Enregistrer la liste</button>
@@ -534,7 +562,6 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
   </aside>
 </main>
 
-<div id="instOv" hidden role="dialog" aria-modal="true" aria-label="Installer l'application"><div class="box"><h2>Installer Trame</h2><div id="instTx"></div><button type="button" class="primary" id="instOk">OK</button></div></div>
 <input type="file" id="file" accept="image/*" multiple hidden>
 <input type="file" id="layerFile" accept="image/*" multiple hidden>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -2450,7 +2477,7 @@ function tapFx(id,btn){
 }
 $('pvAdd').onclick=()=>{if(TP.id)addEffect(TP.id)};
 $('pvCancel').onclick=()=>tapClear();
-{const _add=addEffect;addEffect=function(id,over){tapClear(false);_add(id,over);
+{const _add=addEffect;addEffect=function(id,over){document.body.classList.remove('st-closed');$('togSt').setAttribute('aria-expanded','true');tapClear(false);_add(id,over);
   if(MQ_LAY.matches)setTimeout(()=>{const sc=document.querySelector('aside.stack'),cs=$('stack').querySelectorAll('.card'),c=cs[cs.length-1];
     if(sc&&c)sc.scrollTo({top:sc.scrollTop+c.getBoundingClientRect().top-sc.getBoundingClientRect().top-48,behavior:'smooth'})},80)}}
 {const _render=render;render=function(){_render();if(TP.id)tapRun()}}
@@ -2486,27 +2513,9 @@ async function savePhoto(){
   }catch(e){if(e&&e.name==='AbortError')return}
   saveSheet(blob,file);
 }
+$('togFx').onclick=()=>{const c=document.body.classList.toggle('lib-closed');$('togFx').setAttribute('aria-expanded',String(!c))};
+$('togSt').onclick=()=>{const c=document.body.classList.toggle('st-closed');$('togSt').setAttribute('aria-expanded',String(!c))};
 $('btnSavePhoto').onclick=savePhoto;
-/* ============ Installation (icône sur l'écran d'accueil) ============ */
-(function(){
-  const b=document.getElementById('btnInstall'),ov=document.getElementById('instOv'),tx=document.getElementById('instTx');
-  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
-  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  const mobile=matchMedia('(max-width:700px)').matches||ios||/android/i.test(navigator.userAgent);
-  if(standalone||!mobile)return;
-  let dp=null;b.hidden=false;
-  addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
-  addEventListener('appinstalled',()=>{b.hidden=true});
-  const show=h=>{tx.innerHTML=h;ov.hidden=false};
-  b.onclick=async()=>{
-    if(dp){dp.prompt();try{await dp.userChoice}catch(_){}dp=null;return}
-    if(ios)show('<ol><li>Touchez <b>Partager</b> (le carré avec une flèche vers le haut), en bas de Safari.</li><li>Faites défiler, puis touchez <b>Sur l\'écran d\'accueil</b>.</li><li>Touchez <b>Ajouter</b>.</li></ol>');
-    else show('<ol><li>Ouvrez le menu du navigateur (<b>⋮</b> ou <b>≡</b>).</li><li>Touchez <b>Installer l\'application</b> ou <b>Ajouter à l\'écran d\'accueil</b>.</li></ol>');
-  };
-  document.getElementById('instOk').onclick=()=>{ov.hidden=true};
-  ov.addEventListener('click',e=>{if(e.target===ov)ov.hidden=true});
-})();
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
