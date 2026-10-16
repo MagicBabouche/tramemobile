@@ -7,6 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=Poiret+One&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f1e4d0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Trame">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <style>
 :root{
   --bg:#f1d5c8;--panel:#f8e7de;--panel2:#f2d6c9;--ink:#2a3768;--mute:#7a6673;--line:#dcb1a1;
@@ -436,6 +444,11 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
   .lib{grid-column:2;grid-row:1}.stack{grid-column:2;grid-row:2}
   #library .fxbtn{width:72px}
 }
+#instOv{position:fixed;inset:0;z-index:80;display:grid;place-items:end center;background:rgba(10,10,30,.5);padding:16px calc(16px + env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px))}
+#instOv[hidden]{display:none}
+#instOv .box{width:100%;max-width:420px;background:var(--bg);color:var(--ink);border:1px solid var(--gold);border-radius:18px;padding:18px 18px 14px;box-shadow:0 14px 40px -12px rgba(0,0,0,.5)}
+#instOv h2{margin:0 0 8px}#instOv ol{margin:0 0 14px;padding-left:20px;line-height:1.6}
+#instOv button{width:100%}
 </style>
 </head>
 <body>
@@ -484,6 +497,7 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
           <div class="row2">
             <button type="button" class="primary" id="btnPick">Choisir un fichier</button>
             <button type="button" id="btnSample">Essayer avec un exemple</button>
+            <button type="button" id="btnInstall" hidden>Installer l'application</button>
           </div>
         </div>
       </div>
@@ -520,6 +534,7 @@ body.dragging-stack,body.dragging-stack *{cursor:grabbing!important;user-select:
   </aside>
 </main>
 
+<div id="instOv" hidden role="dialog" aria-modal="true" aria-label="Installer l'application"><div class="box"><h2>Installer Trame</h2><div id="instTx"></div><button type="button" class="primary" id="instOk">OK</button></div></div>
 <input type="file" id="file" accept="image/*" multiple hidden>
 <input type="file" id="layerFile" accept="image/*" multiple hidden>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -2472,6 +2487,26 @@ async function savePhoto(){
   saveSheet(blob,file);
 }
 $('btnSavePhoto').onclick=savePhoto;
+/* ============ Installation (icône sur l'écran d'accueil) ============ */
+(function(){
+  const b=document.getElementById('btnInstall'),ov=document.getElementById('instOv'),tx=document.getElementById('instTx');
+  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const mobile=matchMedia('(max-width:700px)').matches||ios||/android/i.test(navigator.userAgent);
+  if(standalone||!mobile)return;
+  let dp=null;b.hidden=false;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
+  addEventListener('appinstalled',()=>{b.hidden=true});
+  const show=h=>{tx.innerHTML=h;ov.hidden=false};
+  b.onclick=async()=>{
+    if(dp){dp.prompt();try{await dp.userChoice}catch(_){}dp=null;return}
+    if(ios)show('<ol><li>Touchez <b>Partager</b> (le carré avec une flèche vers le haut), en bas de Safari.</li><li>Faites défiler, puis touchez <b>Sur l\'écran d\'accueil</b>.</li><li>Touchez <b>Ajouter</b>.</li></ol>');
+    else show('<ol><li>Ouvrez le menu du navigateur (<b>⋮</b> ou <b>≡</b>).</li><li>Touchez <b>Installer l\'application</b> ou <b>Ajouter à l\'écran d\'accueil</b>.</li></ol>');
+  };
+  document.getElementById('instOk').onclick=()=>{ov.hidden=true};
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.hidden=true});
+})();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
