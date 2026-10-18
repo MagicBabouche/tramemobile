@@ -1,0 +1,10 @@
+TRAME : mettre en ligne et partager
+
+1. Envoyez ces fichiers (index.html, manifest.webmanifest, sw.js, dossier icons) à la racine du dépôt GitHub Pages, en remplaçant les anciens.
+2. Le lien à donner à vos amis : https://magicbabouche.github.io/trame/
+
+POUR vos amis
+- Android (Chrome) : ouvrir le lien, menu ⋮, « Installer l'application » (ou « Ajouter à l'écran d'accueil »).
+- iPhone / iPad (Safari uniquement) : ouvrir le lien, bouton Partager, « Sur l'écran d'accueil ».
+
+L'icône garde le fond beige. Après installation, l'app s'ouvre en plein écran et les images restent sur le téléphone.
