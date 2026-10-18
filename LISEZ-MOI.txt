@@ -1,10 +1,16 @@
-TRAME : mettre en ligne et partager
+TRAME : à mettre à la racine du dépôt GitHub Pages
 
-1. Envoyez ces fichiers (index.html, manifest.webmanifest, sw.js, dossier icons) à la racine du dépôt GitHub Pages, en remplaçant les anciens.
-2. Le lien à donner à vos amis : https://magicbabouche.github.io/trame/
+Fichiers à envoyer (en remplaçant les anciens) :
+  index.html
+  manifest.webmanifest
+  sw.js
+  favicon.ico
+  dossier icons/ (5 images)
 
-POUR vos amis
-- Android (Chrome) : ouvrir le lien, menu ⋮, « Installer l'application » (ou « Ajouter à l'écran d'accueil »).
-- iPhone / iPad (Safari uniquement) : ouvrir le lien, bouton Partager, « Sur l'écran d'accueil ».
+Lien à donner : https://magicbabouche.github.io/trame/
 
-L'icône garde le fond beige. Après installation, l'app s'ouvre en plein écran et les images restent sur le téléphone.
+Installation chez vos amis
+- Android (Chrome) : ouvrir le lien, menu ⋮, « Installer l'application ».
+- iPhone / iPad (Safari uniquement) : ouvrir le lien, Partager, « Sur l'écran d'accueil ».
+
+Si l'ancienne icône s'affiche encore : supprimer l'ancien raccourci du téléphone et le recréer.
