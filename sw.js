@@ -1,5 +1,38 @@
-const C='trame-v2',A=['./','index.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()))});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;
-  e.respondWith(fetch(e.request).then(r=>{if(r.ok&&new URL(e.request.url).origin===location.origin){const q=r.clone();caches.open(C).then(c=>c.put(e.request,q))}return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('index.html'))))});
+// Incrémenter VERSION à chaque mise à jour de index.html
+const VERSION = 'trame-v1';
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  const font = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
+  if (!font && url.origin !== location.origin) return;
+
+  // Cache d'abord (ouverture instantanée), mise à jour en arrière-plan
+  e.respondWith(
+    caches.open(VERSION).then(async cache => {
+      const hit = await cache.match(req, { ignoreSearch: true });
+      const net = fetch(req).then(r => {
+        if (r && (r.ok || r.type === 'opaque')) cache.put(req, r.clone());
+        return r;
+      }).catch(() => null);
+      if (hit) { e.waitUntil(net); return hit; }
+      const r = await net;
+      if (r) return r;
+      if (req.mode === 'navigate') return cache.match('./index.html');
+      return Response.error();
+    })
+  );
+});

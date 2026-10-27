@@ -1,31 +1,14 @@
 {
- "name": "Trame",
- "short_name": "Trame",
- "description": "Effets d'image dans le navigateur",
- "start_url": "./",
- "scope": "./",
- "display": "standalone",
- "background_color": "#f1ddb0",
- "theme_color": "#f1ddb0",
- "lang": "fr",
- "icons": [
-  {
-   "src": "icons/icon-192.png",
-   "sizes": "192x192",
-   "type": "image/png",
-   "purpose": "any"
-  },
-  {
-   "src": "icons/icon-512.png",
-   "sizes": "512x512",
-   "type": "image/png",
-   "purpose": "any"
-  },
-  {
-   "src": "icons/maskable-512.png",
-   "sizes": "512x512",
-   "type": "image/png",
-   "purpose": "maskable"
-  }
- ]
+  "name": "Trame · Abstrait",
+  "short_name": "Trame",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1e4d0",
+  "theme_color": "#f1e4d0",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ]
 }
