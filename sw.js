@@ -1,5 +1,5 @@
 // Incrémenter VERSION à chaque mise à jour de index.html
-const VERSION = 'trame-v1';
+const VERSION = 'trame-v2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
